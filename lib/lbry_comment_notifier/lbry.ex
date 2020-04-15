@@ -7,7 +7,6 @@ defmodule LbryCommentNotifier.Lbry do
   alias Tesla.Env
 
   plug(Tesla.Middleware.BaseUrl, url())
-  plug(Tesla.Middleware.Logger)
 
   plug(Tesla.Middleware.Retry,
     delay: 500,
@@ -91,6 +90,9 @@ defmodule LbryCommentNotifier.Lbry do
       field(:comment, :string)
       field(:is_hidden, :boolean)
       field(:timestamp, Timestamp)
+
+      field(:account, :map)
+      field(:claim, :map)
     end
 
     def changeset(entity, attrs) do
@@ -116,11 +118,11 @@ defmodule LbryCommentNotifier.Lbry do
       field(:total_items, :integer)
     end
 
-    def changeset(entity, item_module, attrs) do
+    def changeset(entity, attrs) do
       entity
       |> Changeset.cast(attrs, @fields)
       |> Changeset.validate_required(@fields)
-      |> Changeset.cast_embed(:items, required: true)
+      |> Changeset.cast_embed(:items)
     end
   end
 
@@ -140,11 +142,11 @@ defmodule LbryCommentNotifier.Lbry do
       field(:total_items, :integer)
     end
 
-    def changeset(entity, item_module, attrs) do
+    def changeset(entity, attrs) do
       entity
       |> Changeset.cast(attrs, @fields)
       |> Changeset.validate_required(@fields)
-      |> Changeset.cast_embed(:items, required: true)
+      |> Changeset.cast_embed(:items)
     end
   end
 
@@ -164,11 +166,11 @@ defmodule LbryCommentNotifier.Lbry do
       field(:total_items, :integer)
     end
 
-    def changeset(entity, item_module, attrs) do
+    def changeset(entity, attrs) do
       entity
       |> Changeset.cast(attrs, @fields)
       |> Changeset.validate_required(@fields)
-      |> Changeset.cast_embed(:items, required: true)
+      |> Changeset.cast_embed(:items)
     end
   end
 
@@ -193,7 +195,6 @@ defmodule LbryCommentNotifier.Lbry do
     |> parse_paginated(Claim)
   end
 
-
   def paginated_comments_by_claim_id(claim_id, base_page \\ nil, base_page_size \\ nil) do
     page = base_page || 1
     page_size = base_page_size || page_size()
@@ -205,7 +206,6 @@ defmodule LbryCommentNotifier.Lbry do
     })
     |> parse_paginated(Comment)
   end
-
 
   defp parse_paginated(response, item_module) do
     case response do
@@ -226,7 +226,7 @@ defmodule LbryCommentNotifier.Lbry do
 
         paginated_module
         |> struct(%{})
-        |> paginated_module.changeset(item_module, result)
+        |> paginated_module.changeset(result)
         |> case do
           %Changeset{valid?: true} = changeset ->
             {:ok, Changeset.apply_changes(changeset)}

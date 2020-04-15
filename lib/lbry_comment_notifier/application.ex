@@ -7,7 +7,11 @@ defmodule LbryCommentNotifier.Application do
 
   def start(_type, _args) do
     children = [
-      App.Repo
+      %{
+        id: LbryCommentNotifier.Repo.Supervisor,
+        start: {LbryCommentNotifier.Repo, :start_link, []}
+      },
+      App.Scheduler
     ]
 
     opts = [strategy: :one_for_one, name: LbryCommentNotifier.Supervisor]

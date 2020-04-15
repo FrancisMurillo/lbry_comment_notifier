@@ -1,5 +1,5 @@
 defmodule Timestamp do
-  use Ecto.Type
+  @behaviour Ecto.Type
 
   def type, do: :utc_datetime
 
