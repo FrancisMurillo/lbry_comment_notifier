@@ -12,9 +12,4 @@ config :lbry_comment_notifier, LbryCommentNotifier.Mailer, adapter: Bamboo.SMTPA
 
 config :lbry_comment_notifier, LbryCommentNotifier.Repo, adapter: Sqlite.Ecto2
 
-config :lbry_comment_notifier, LbryCommentNotifier.Scheduler,
-  jobs: [
-    {"@daily", {LbryCommentNotifier.Jobs, :notify_new_comments, []}}
-  ]
-
 import_config "#{Mix.env()}.exs"

@@ -1,51 +1,80 @@
-defmodule LbryCommentNotifier.Jobs do
+defmodule LbryCommentNotifier.Watcher do
   @moduledoc false
+
+  use GenServer
 
   require Logger
 
+  alias Crontab.CronExpression.Parser
   alias Flow
+  alias Quantum.Job
 
-  alias LbryCommentNotifier.{Lbry, Comment, Claim, Repo, Emails, Mailer}
+  alias LbryCommentNotifier.{Lbry, Comment, Claim, Repo, Emails, Mailer, Scheduler}
+
+  def start_link(opts) do
+    GenServer.start_link(__MODULE__, opts)
+  end
+
+  @impl true
+  def init(_opts) do
+    Scheduler.new_job()
+    |> Job.set_name(:notifier)
+    |> Job.set_schedule(schedule())
+    |> Job.set_task(&notify_new_comments/0)
+    |> Scheduler.add_job()
+    |> IO.inspect()
+
+    Process.send_after(self(), :__run_immediately__, 1_000)
+
+    {:ok, nil}
+  end
+
+  def handle_info(:__run_immediately__, state) do
+    spawn_link(&notify_new_comments/0)
+
+    {:noreply, state}
+  end
 
   def notify_new_comments() do
     Logger.info("Checking for new comments")
 
-    new_comments = stream_comments()
-    |> Flow.map(fn comment ->
-      id = comment.comment_id
+    new_comments =
+      stream_comments()
+      |> Flow.map(fn comment ->
+        id = comment.comment_id
 
-      comment_entity = Repo.get_by(Comment, id: id)
+        comment_entity = Repo.get_by(Comment, id: id)
 
-      cond do
-        is_nil(comment_entity) ->
-          Logger.info("Found new comment #{id}")
+        cond do
+          is_nil(comment_entity) ->
+            Logger.info("Found new comment #{id}")
 
-          %Comment{}
-          |> Comment.changeset(comment)
-          |> Repo.insert!()
+            %Comment{}
+            |> Comment.changeset(comment)
+            |> Repo.insert!()
 
-        comment_entity.comment != comment.comment ->
-          Logger.info("Updating edited #{id}")
+          comment_entity.comment != comment.comment ->
+            Logger.info("Updating edited #{id}")
 
-          comment_entity
-          |> Comment.changeset(comment)
-          |> Repo.update!()
+            comment_entity
+            |> Comment.changeset(comment)
+            |> Repo.update!()
 
-        true ->
-          nil
-      end
-    end)
-    |> Stream.reject(&is_nil/1)
-    |> Stream.map(fn comment ->
-      comment
-      |> Emails.new_comment_email()
-      |> Mailer.deliver_now()
+          true ->
+            nil
+        end
+      end)
+      |> Stream.reject(&is_nil/1)
+      |> Stream.map(fn comment ->
+        comment
+        |> Emails.new_comment_email()
+        |> Mailer.deliver_now()
 
-      comment
-      |> Comment.read_changeset()
-      |> Repo.update!()
-    end)
-    |> Enum.to_list()
+        comment
+        |> Comment.read_changeset()
+        |> Repo.update!()
+      end)
+      |> Enum.to_list()
 
     Logger.info("Done checking for new comments")
 
@@ -193,4 +222,13 @@ defmodule LbryCommentNotifier.Jobs do
       fn _ -> :ok end
     )
   end
+
+  defp schedule() do
+    sched = config()[:schedule] || "@hourly"
+
+    Parser.parse!(sched)
+  end
+
+  defp config(),
+    do: Application.get_env(:lbry_comment_notifier, __MODULE__) || []
 end

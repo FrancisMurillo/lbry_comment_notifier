@@ -30,7 +30,8 @@ defmodule LbryCommentNotifier.MixProject do
       {:bamboo, "~> 1.4.0"},
       {:bamboo_smtp, "~> 2.1.0"},
       {:timex, "~> 3.6.1"},
-      {:quantum, "~> 3.0.0-rc.2"}
+      {:quantum, "~> 3.0.0-rc.3"},
+      {:distillery, "~> 2.1.1"}
     ]
   end
 

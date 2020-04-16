@@ -6,10 +6,6 @@ config :lbry_comment_notifier, LbryCommentNotifier.Emails,
   from: "notifier@lbry.local",
   to: "user@lbry.local"
 
-config :lbry_comment_notifier, LbryCommentNotifier.Repo, database: "data.sqlite3"
-
-config :lbry_comment_notifier, LbryCommentNotifier.Scheduler, debug_logging: true
-
 config :lbry_comment_notifier, LbryCommentNotifier.Mailer,
   server: "localhost",
   hostname: "localhost",
@@ -20,3 +16,9 @@ config :lbry_comment_notifier, LbryCommentNotifier.Mailer,
   retries: 1,
   no_mx_lookups: false,
   auth: :if_available
+
+config :lbry_comment_notifier, LbryCommentNotifier.Repo, database: "data.dev.sqlite3"
+
+config :lbry_comment_notifier, LbryCommentNotifier.Scheduler, debug_logging: true
+
+config :lbry_comment_notifier, LbryCommentNotifier.Watcher, schedule: "@hourly"
