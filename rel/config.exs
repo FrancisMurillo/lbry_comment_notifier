@@ -4,8 +4,8 @@
 |> Enum.map(&Code.eval_file(&1))
 
 use Distillery.Releases.Config,
-    default_release: :default,
-    default_environment: Mix.env()
+  default_release: :default,
+  default_environment: Mix.env()
 
 environment :dev do
   set dev_mode: true
@@ -20,11 +20,19 @@ environment :prod do
   set vm_args: "rel/vm.args"
 
   set pre_start_hooks: "rel/hooks/pre_start"
+
+  set config_providers: [
+    {Toml.Provider, [path: "${RELEASE_ROOT_DIR}/config.toml"]}
+  ]
+  set overlays: [
+    {:copy, "config/defaults.toml", "config.toml"}
+  ]
 end
 
 release :lbry_comment_notifier do
   set version: current_version(:lbry_comment_notifier)
   set applications: [
-    :runtime_tools
+    :runtime_tools,
+    lbry_comment_notifier: :permanent,
   ]
 end

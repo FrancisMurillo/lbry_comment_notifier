@@ -14,7 +14,7 @@ defmodule LbryCommentNotifier.MixProject do
 
   def application do
     [
-      extra_applications: [:logger, :mnesia],
+      extra_applications: [:logger, :toml],
       mod: {LbryCommentNotifier.Application, []}
     ]
   end
@@ -31,7 +31,8 @@ defmodule LbryCommentNotifier.MixProject do
       {:bamboo_smtp, "~> 2.1.0"},
       {:timex, "~> 3.6.1"},
       {:quantum, "~> 3.0.0-rc.3"},
-      {:distillery, "~> 2.1.1"}
+      {:distillery, "~> 2.1.1"},
+      {:toml, "~> 0.5.2"}
     ]
   end
 

@@ -29,6 +29,7 @@ defmodule LbryCommentNotifier.Watcher do
     {:ok, nil}
   end
 
+  @impl true
   def handle_info(:__run_immediately__, state) do
     spawn_link(&notify_new_comments/0)
 

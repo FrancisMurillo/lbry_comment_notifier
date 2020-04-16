@@ -6,6 +6,10 @@ config :lbry_comment_notifier, LbryCommentNotifier.Emails,
   from: "notifier@lbry.local",
   to: "user@lbry.local"
 
+config :lbry_comment_notifier, LbryCommentNotifier.Lbry,
+  url: "http://localhost:5279",
+  page_size: 10
+
 config :lbry_comment_notifier, LbryCommentNotifier.Mailer,
   server: "localhost",
   hostname: "localhost",

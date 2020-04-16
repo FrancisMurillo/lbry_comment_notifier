@@ -1,0 +1,46 @@
+# Email configuration
+[lbry_comment_notifier."LbryCommentNotifier.Emails"]
+# The from field of emails
+from = "me@localhost"
+# The to field of email
+to = "nobody@localhost"
+
+
+# LBRY API module
+# Preferably, a desktop app is run alongside this
+#  so that an API can be used.
+[lbry_comment_notifier."LbryCommentNotifier.Lbry"]
+# The url of the SDK
+url = "http://localhost:5279"
+# The default page size when using the endpoints
+page_size = 10
+
+
+# The mailer is configured to send mail via SMTP
+# Preferably, a local mailcatcher is preferred
+[lbry_comment_notifier."LbryCommentNotifier.Mailer"]
+# SMTP server name
+server = "localhost"
+# SMTP host
+host = "localhost"
+# SMTP port
+port = 1025
+# Optionally configure username and password if not using
+#   the preferred local mailcatcher setup
+# SMTP username
+# username = "user"
+# SMTP password
+# password = "pass"
+
+
+# The SQLite database used to store comments
+[lbry_comment_notifier."LbryCommentNotifier.Repo"]
+# Name of the SQLite database
+database = "data.sqlite3"
+
+
+# The cron job watching on the comments
+[lbry_comment_notifier."LbryCommentNotifier.Watcher"]
+# Schedule is the cron format to check for notifications
+# Here it is set to 0 * * * * which is hourly
+schedule = "0 * * * *"
